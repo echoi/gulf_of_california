@@ -1,0 +1,1 @@
+This project aims to understand the role of the Farallon slab on the tectonic evolution of the Gulf of California using numerical models.
