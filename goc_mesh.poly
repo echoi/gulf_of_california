@@ -25,7 +25,7 @@
 22 400.00e3 1000.00e3    0.00e3
 23 800.00e3 1000.00e3    0.00e3
 ### Boundary facets
-24 1
+26 1
 #   1, western
 #   2, eastern
 #   4, southern
@@ -77,7 +77,7 @@
 4 16 17 22 21
 1 0 32
 4 17 18 23 22
-# 5 internal facets
+# 7 internal facets
 1 0 0
 4 15 12 13 20
 1 0 0
@@ -88,6 +88,10 @@
 4 7 8 11 10
 1 0 0
 4 6 4 5 9
+1 0 0 
+4 12 13 21 16
+1 0 0
+4 7 10 22 17
 ### Holes
 0
 ### Regions
@@ -97,13 +101,13 @@
 5
 # 6 data fields per region
 # 1. dummy 2. x 3. y 4. z (of any point in the region) 5. ID 6. max. element volume.
-# matID 0: Farallon asthenosphere
-0 100.00e3 500.00e3 -100.00e3 0 120.0e9
+# matID 0: Pacific mantle
+0 100.00e3 500.00e3 -100.00e3 0 500.0e9
 # matID 1: NA lith. mantle
-1 600.00e3 500.00e3 -100.00e3 1 120.0e9
-# matID 2: Farallon asthenosphere
-2 600.00e3 500.00e3  -17.00e3 2 120.0e9
-# matID 3: Farallon asthenosphere
+1 600.00e3 500.00e3 -100.00e3 1 500.0e9
+# matID 2: NA crust
+2 600.00e3 500.00e3  -17.00e3 2 500.0e9
+# matID 3: Felsic Baja crust
 3 350.00e3 500.00e3  -17.00e3 3 120.0e9
-# matID 4: Farallon asthenosphere
-4 250.00e3 500.00e3   -5.00e3 4 120.0e9 
+# matID 4: Mafic Baja crust
+4 270.00e3 500.00e3   -5.00e3 4 120.0e9 
