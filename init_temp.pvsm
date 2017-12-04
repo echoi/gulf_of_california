@@ -1514,7 +1514,7 @@
         <Element index="0" value=""/>
       </Property>
       <Property name="LabelBold" id="3617.LabelBold" number_of_elements="1">
-        <Element index="0" value="0"/>
+        <Element index="0" value="1"/>
         <Domain name="bool" id="3617.LabelBold.bool"/>
       </Property>
       <Property name="LabelColor" id="3617.LabelColor" number_of_elements="3">
@@ -1602,7 +1602,7 @@
         <Element index="0" value="Temperature (K)"/>
       </Property>
       <Property name="TitleBold" id="3617.TitleBold" number_of_elements="1">
-        <Element index="0" value="0"/>
+        <Element index="0" value="1"/>
         <Domain name="bool" id="3617.TitleBold.bool"/>
       </Property>
       <Property name="TitleColor" id="3617.TitleColor" number_of_elements="3">
