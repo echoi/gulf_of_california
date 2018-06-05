@@ -72,9 +72,9 @@ subsection Geometry model
     # To keep the aspect ratio of our elements close to one, we chose the 
     # coarse mesh is such a way that it has more elements in X than in Y
     # direction, in the same ratio as the aspect ratio of the model. 
-    set X repetitions = 4
-    set Y repetitions = 2
-    # set Z repetitions = 6
+    set X repetitions = 2
+    set Y repetitions = 1
+    # set Z repetitions = 3
   end
 end
 
@@ -98,21 +98,22 @@ end
 # axis or more, the rigid plate uniformly moves away from the ridge with a constant 
 # speed, and close to the ridge we interpolate between these two conditions. 
 subsection Boundary velocity model
-  set Prescribed velocity boundary indicators = top:function
-  set Tangential velocity boundary indicators = left
-  subsection Function
-    # We choose a half-spreading rate of u0=3cm/yr.  
-    set Function constants  = u0=0.03, x0=10000
-    set Variable names      = x,z
-    set Function expression = if(x<x0,(1-(x/x0-1)*(x/x0-1))*u0,u0); 0
-  end
+  #set Prescribed velocity boundary indicators = top:function
+  #set Tangential velocity boundary indicators = left
+  set Tangential velocity boundary indicators = top
+  #subsection Function
+  #  # We choose a half-spreading rate of u0=3cm/yr.  
+  #  set Function constants  = u0=0.03, x0=10000
+  #  set Variable names      = x,z
+  #  set Function expression = if(x<x0,(1-(x/x0-1)*(x/x0-1))*u0,u0); 0
+  #end
 end
 
 # We prescribe the lithostatic pressure as a boundary traction on 
 # the bottom and right side of the model, so that material can flow in and out 
 # according to the flow induced by the moving plate.  
 subsection Boundary traction model
-  set Prescribed traction boundary indicators = right:initial lithostatic pressure, bottom:initial lithostatic pressure
+  set Prescribed traction boundary indicators = left:initial lithostatic pressure, right:initial lithostatic pressure, bottom:initial lithostatic pressure
 
   subsection Initial lithostatic pressure
     # We calculate the pressure profile at the right model boundary. 
