@@ -127,15 +127,28 @@ end
 # top and the bottom. We make the top boundary layer very old (100 Ma) so that in the 
 # beginning, the material is still solid and the porosity is zero.
 subsection Initial temperature model
-  set Model name = adiabatic
-  subsection Adiabatic
-    set Age top boundary layer      = 1e8
-    set Age bottom boundary layer   = 1e5
-    set Amplitude                   = 0
-    subsection Function
-      set Function expression       = 0;0
-    end
+  set Model name = function
+  subsection Function
+    set Variable names            = x,y
+    set Function constants        = 
+    set Function expression       = 0;0
   end
+  #set Model name = ascii data
+  #subsection Ascii data model
+  #  set Data directory = .
+  #  set Data file name = goc_initT.txt
+  #end
+  set Model name = adiabatic
+  #subsection Adiabatic
+  #  set Age top boundary layer      = 1e8
+  #  #set Age top boundary layer      = function
+  #  set Age bottom boundary layer   = 1e5
+  #  set Amplitude                   = 0
+  #  subsection Function
+  #    set Variable names            = x,y
+  #    set Function expression       = 0;0
+  #  end
+  #end
 end
 
 # We choose a constant temperature at the top and bottom of the domain. 
