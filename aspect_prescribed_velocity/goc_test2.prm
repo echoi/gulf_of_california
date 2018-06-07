@@ -127,18 +127,21 @@ end
 # top and the bottom. We make the top boundary layer very old (100 Ma) so that in the 
 # beginning, the material is still solid and the porosity is zero.
 subsection Initial temperature model
-  set Model name = function
-  subsection Function
-    set Variable names            = x,y
-    set Function constants        = NA_age=1e8, kappa=1e-6, pi=3.141592653589793
-    set Function expression       = if( x > 100e3 & y > 350e3 - (x-100e3)*tan(15.0*pi/180.0), 293.0 + 1300.0*erf(0.5*y/sqrt(kappa*NA_age)), if( x > 100e3 & y <= 350e3 - (x-100e3)*tan(15.0*pi/180.0), 293.0 + 1300.0*erf(0.5*y/sqrt(kappa*(5e6 + 30e6*(x-100e3)/600e3))), 293.0 + 1300.0*erf(0.5*y/sqrt(kappa*(0.1e6 + 5e6*x/100e3))) ) )
-  end
-  #set Model name = ascii data
-  #subsection Ascii data model
-  #  set Data directory = .
-  #  set Data file name = goc_initT.txt
+  #set Model name = function
+  #subsection Function
+  #  set Variable names            = x,y
+  #  set Function constants        = NA_age=1e8, kappa=1e-6, pi=3.141592653589793
+  #  set Function expression       = if( x > 100e3 & y > 350e3 - (x-100e3)*tan(15.0*pi/180.0), 293.0 + 1300.0*erf(0.5*y/sqrt(kappa*NA_age)),\
+  #                                    if( x > 100e3 & y <= 350e3 - (x-100e3)*tan(15.0*pi/180.0), 293.0 + 1300.0*erf(0.5*y/sqrt(kappa*(5e6 + 30e6*(x-100e3)/600e3))), \
+  #                                        293.0 + 1300.0*erf(0.5*y/sqrt(kappa*(0.1e6 + 5e6*x/100e3))) ) \
+  #                                  );
   #end
-  set Model name = adiabatic
+  set Model name = ascii data
+  subsection Ascii data model
+    set Data directory = .
+    set Data file name = goc_initT.txt
+  ssend
+  #set Model name = adiabatic
   #subsection Adiabatic
   #  set Age top boundary layer      = 1e8
   #  #set Age top boundary layer      = function
