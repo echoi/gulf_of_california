@@ -160,7 +160,7 @@ subsection Boundary temperature model
 
   subsection Box
     set Top temperature = 293
-    set Bottom temperature = 1570
+    set Bottom temperature = 1593
   end
 end
 
@@ -280,13 +280,13 @@ subsection Prescribed velocities
     # Return where to prescribe u_x; u_y; u_z
     # (last one only used if dimension = 3)
     # 1 if velocity should be prescribed, 0 otherwise
-    set Function expression = if(((x>-0.1)&(x<1.9))&(abs(x-(1-y))<.01),1,0); \
+    set Function expression = if(((x>100e3)&(x<700e3))&(y <= 350e3 - (x-100e3)*tan(15.0*pi/180.0)),1,0); \
                                 if(((x>-0.1)&(x<1.9))&(abs(x-(1-y))<.01),1,0)
   end
   subsection Velocity function
     set Variable names = x,y,t
     # Return u_x; u_y; u_z (u_z only used if in 3d)
-    set Function expression = 1;-1
+    set Function expression = 0.03;-0.03
   end
 end
 
