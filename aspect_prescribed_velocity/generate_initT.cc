@@ -20,7 +20,7 @@ int main()
     const double v_half = 0.106 / YEAR2SEC; // m/yr to m/s.
 
     const double xt = 100.0e3;
-    const double x0 = 150.0e3;
+    const double x0 = 0.0e3;
     const double surface_temperature = 293.0;
     const double mantle_temperature = 1593.0;
             
@@ -37,6 +37,7 @@ int main()
     initT_file << "# Columns: x y temperature [K]" << std::endl;
     for( int j = 0; j < nz; ++j ) {
         for (int i = 0; i < nx; ++i) {
+            int counter = i + j * nx;
             double xn = i*(xmax-xmin)/(nx-1);
             double zn = j*(zmax-zmin)/(nz-1);
             double yn = 0.0;
@@ -50,11 +51,11 @@ int main()
                 age = dist / (v_half * cos_alpha_FAR);
             }
             // If in the NA plate
-            else if( xn > xt && zn > -(xn-xt) * tan_delta ) {
+            else if( xn > xt && zn > zmax - ( xn - xt ) * tan_delta ) {
                 age = 100.0e6 * YEAR2SEC; // 100 My in seconds
             }
             // If in or beneath the subducted plate
-            else if( xn > xt && zn <= -(xn-xt) * tan_delta ) {
+            else if( xn > xt && zn <= zmax - ( xn - xt ) * tan_delta ) {
                 double xs = (xn - tan_delta * zn + tan_delta_sqrd * xt) / (1.0 + tan_delta_sqrd );
                 double ys = yn;
                 double zs = -tan_delta * ( xs - xt );
@@ -66,10 +67,12 @@ int main()
                 age = d_tr / (v_half * cos_alpha_FAR) + d_st / ( v_half * cos_alpha_FAR * cos_del_cos_theta);
                 depth = sqrt( (xs-xn)*(xs-xn) + (zs-zn)*(zs-zn) );
             }
-            
+           
+            if(age==0.0) age = 0.1e6 * YEAR2SEC; 
             double w = 0.5 * depth / sqrt( diffusivity * age );
             double temperature = surface_temperature + ( mantle_temperature - surface_temperature ) * erf(w);
             initT_file << xn <<" "<< zn <<" "<< temperature << std::endl;
+            std::cerr << counter <<" "<< xn <<" "<< zn <<" "<< temperature << std::endl;
         }
     }
     initT_file.close();

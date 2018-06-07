@@ -275,7 +275,7 @@ end
 
 ################ Prescribed Internal Velocity ################
 ## Turn prescribed velocities on
-set Prescribe internal velocities = true
+set Prescribe internal velocities = false
 
 subsection Prescribed velocities
   subsection Indicator function
