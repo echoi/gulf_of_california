@@ -4,7 +4,7 @@
 # of the ridge. 
 
 set Dimension                              = 2
-set Adiabatic surface temperature          = 1570
+set Adiabatic surface temperature          = 1593
 
 # Because our model includes melt transport, it is nonlinear and we have to 
 # use an iterative solver scheme, that iterates between solving the temperature
@@ -138,9 +138,9 @@ subsection Initial temperature model
   #end
   set Model name = ascii data
   subsection Ascii data model
-    set Data directory = .
+    set Data directory = ./
     set Data file name = goc_initT.txt
-  ssend
+  end
   #set Model name = adiabatic
   #subsection Adiabatic
   #  set Age top boundary layer      = 1e8
