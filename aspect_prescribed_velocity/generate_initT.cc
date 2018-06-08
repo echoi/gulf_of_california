@@ -8,6 +8,7 @@ int main()
     const double diffusivity = 1.0e-6;
     const double dip_FAR = 15.0 * M_PI / 180.0;
     const double tan_delta = tan(dip_FAR);
+    const double cos_delta = cos(dip_FAR);
     const double tan_delta_sqrd = tan_delta * tan_delta;
     const double strike_Ridge = 7.0 * M_PI / 180.0;
     const double tan_theta = tan(strike_Ridge);
@@ -17,7 +18,7 @@ int main()
     const double obliquity_PAC = 330.0 * M_PI / 180.0;
     const double cos_alpha_PAC = cos(obliquity_PAC);
     const double YEAR2SEC = 3.1536e7;
-    const double v_half = 0.106 / YEAR2SEC; // m/yr to m/s.
+    const double v_half = 0.03 / YEAR2SEC; // m/yr to m/s.
 
     const double xt = 100.0e3;
     const double x0 = 0.0e3;
@@ -45,17 +46,23 @@ int main()
             double depth  = zmax - zn;
             // If in or beneath unsubducted plates
             if( xn <= xt ) {
+#if 0
                 double xr = (x0 + tan_theta * (tan_theta*xn-yn))/(1.0+tan_theta*tan_theta);
                 double yr = tan_theta * (xr-xn) + yn;
                 double dist = sqrt( (xr-xn)*(xr-xn) + (yr-yn)*(yr-yn) );
                 age = dist / (v_half * cos_alpha_FAR);
+#endif
+                age = xn / v_half ;
+                std::cerr << "Unsubducted plates: x="<< xn <<" age="<<age<<std::endl;
             }
             // If in the NA plate
             else if( xn > xt && zn > zmax - ( xn - xt ) * tan_delta ) {
                 age = 100.0e6 * YEAR2SEC; // 100 My in seconds
+                std::cerr << "In NA plate: x="<< xn <<" age="<<age<<std::endl;
             }
             // If in or beneath the subducted plate
             else if( xn > xt && zn <= zmax - ( xn - xt ) * tan_delta ) {
+#if 0
                 double xs = (xn - tan_delta * zn + tan_delta_sqrd * xt) / (1.0 + tan_delta_sqrd );
                 double ys = yn;
                 double zs = -tan_delta * ( xs - xt );
@@ -65,7 +72,12 @@ int main()
                 double d_tr = sqrt( (xr-xt)*(xr-xt) + (yr-yt)*(yr-yt) );
                 double d_st = sqrt( (xt-xs)*(xt-xs) + (yt-ys)*(yt-ys) );
                 age = d_tr / (v_half * cos_alpha_FAR) + d_st / ( v_half * cos_alpha_FAR * cos_del_cos_theta);
-                depth = sqrt( (xs-xn)*(xs-xn) + (zs-zn)*(zs-zn) );
+                depth = zmax - sqrt( (xs-xn)*(xs-xn) + (zs-zn)*(zs-zn) );
+#endif
+                age = xn / ( v_half * cos_delta );
+                depth = ( zmax - ( xn - xt ) * tan_delta - zn ) / cos_delta;
+                std::cerr << "In subducted Farallon plate: x="<< xn <<" age="<< age 
+                          << " depth="<< depth << std::endl;
             }
            
             if(age==0.0) age = 0.1e6 * YEAR2SEC; 

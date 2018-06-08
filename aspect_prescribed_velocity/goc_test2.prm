@@ -221,7 +221,7 @@ subsection Mesh refinement
   # A refinement level of 5 (4 global + 1 adaptive refinements) corresponds to 
   # a cell size of approximately 1 km. 
   set Initial adaptive refinement              = 1
-  set Initial global refinement                = 4
+  set Initial global refinement                = 6
   set Strategy                                 = minimum refinement function, composition threshold
   set Time steps between mesh refinement       = 5
 
