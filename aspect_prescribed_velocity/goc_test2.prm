@@ -57,6 +57,74 @@ subsection Material model
   end
 end
 
+# Material model
+# Rheology: Non-linear viscous flow and Drucker Prager Plasticity
+# Values for most rheological parameters are specified for a background material and
+# each compositional field.  Values for viscous deformation are based on dislocation
+# creep flow-laws, with distinct values for the upper crust (wet quartzite), lower
+# crust (wet anorthite) and mantle (dry olivine).  Table 1 of Naliboff and Buiter (2015),
+# Earth Planet. Sci. Lett., v.421, p. 58-67 contains values for each of these flow laws.     
+#subsection Material model
+#  set Model name = visco plastic
+#
+#  subsection Visco Plastic
+#
+#    # Reference temperature and viscosity
+#    set Reference temperature = 293
+#    set Reference viscosity = 1e22
+#    
+#    # The minimum strain-rate helps limit large viscosities values that arise
+#    # as the strain-rate approaches zero.
+#    # The reference strain-rate is used on the first non-linear iteration
+#    # of the first time step when the velocity has not been determined yet. 
+#    set Minimum strain rate = 1.e-20
+#    set Reference strain rate = 1.e-16
+#
+#    # Limit the viscosity with minimum and maximum values
+#    set Minimum viscosity = 1e18
+#    set Maximum viscosity = 1e26
+#
+#    # Thermal diffusivity is adjusted to match thermal conductivities
+#    # assumed in assigning the initial geotherm
+#    set Thermal diffusivities = 1.333333e-6, 1.190476e-6, 1.149425e-6, 1.333333e-6
+#    set Heat capacities       =        750.,        750.,        750.,        750.
+#    set Densities             =        3300,        2800,        2900,        3300
+#    set Thermal expansivities =        2e-5,        2e-5,        2e-5,        2e-5
+#
+#    # Harmonic viscosity averaging
+#    set Viscosity averaging scheme = harmonic
+#
+#    # Choose to have the viscosity (pre-yield) follow a dislocation
+#    # diffusion or composite flow law.  Here, dislocation is selected
+#    # so no need to specify diffusion creep parameters below, which are
+#    # only used if "diffusion" or "composite" option is selected.
+#    set Viscous flow law = dislocation
+#
+#    # Dislocation creep parameters for 
+#    # 1. Background material/mantle (dry olivine)
+#    #    Hirth & Kohlstedt (2004),  Geophys. Monogr. Am. Geophys. Soc., v.138, p.83-105.
+#    #    "Rheology of the upper mantle and the mantle wedge:a view from the experimentalists"
+#    # 2. Upper crust (wet quartzite)
+#    #    Rutter & Brodie (2004), J. Struct. Geol., v.26, p.2011-2023.
+#    #    "Experimental grain size-sensitive flow of hot-pressed Brazilian quartz aggregates"
+#    # 3. Lower crust and weak seed (wet anorthite)
+#    #    Rybacki et al. (2006), J. Geophys. Res., v.111(B3).
+#    #    "Influence of water fugacity and activation volume on the flow properties of fine-grained    
+#    #    anorthite aggregates"
+#    # Note that the viscous pre-factors below are scaled to plane strain from unixial strain experiments.
+#    set Prefactors for dislocation creep          = 6.52e-16, 8.57e-28, 7.13e-18, 6.52e-16
+#    set Stress exponents for dislocation creep    =      3.5,      4.0,      3.0,      3.5
+#    set Activation energies for dislocation creep =   530.e3,   223.e3,   345.e3,   530.e3
+#    set Activation volumes for dislocation creep  =   18.e-6,       0.,       0.,   18.e-6
+#
+#    # Plasticity parameters
+#    set Angles of internal friction =   20.,   20.,   20.,   20.
+#    set Cohesions                   = 20.e6, 20.e6, 20.e6, 20.e6
+#
+#  end
+#end
+
+
 ##################### Model geometry ########################
 
 # Our model geometry is a box of 105x70 km. This guarantees that inflowing 
@@ -72,8 +140,8 @@ subsection Geometry model
     # To keep the aspect ratio of our elements close to one, we chose the 
     # coarse mesh is such a way that it has more elements in X than in Y
     # direction, in the same ratio as the aspect ratio of the model. 
-    set X repetitions = 2
-    set Y repetitions = 1
+    set X repetitions = 100
+    set Y repetitions = 50
     # set Z repetitions = 3
   end
 end
@@ -82,7 +150,7 @@ end
 subsection Gravity model
   set Model name = vertical
   subsection Vertical
-    set Magnitude = 10.0
+    set Magnitude = 9.81
   end
 end
 
@@ -98,22 +166,22 @@ end
 # axis or more, the rigid plate uniformly moves away from the ridge with a constant 
 # speed, and close to the ridge we interpolate between these two conditions. 
 subsection Boundary velocity model
-  #set Prescribed velocity boundary indicators = top:function
+  set Prescribed velocity boundary indicators = right:function
   #set Tangential velocity boundary indicators = left
-  set Tangential velocity boundary indicators = top
-  #subsection Function
-  #  # We choose a half-spreading rate of u0=3cm/yr.  
-  #  set Function constants  = u0=0.03, x0=10000
-  #  set Variable names      = x,z
-  #  set Function expression = if(x<x0,(1-(x/x0-1)*(x/x0-1))*u0,u0); 0
-  #end
+  set Tangential velocity boundary indicators = top, left
+  subsection Function
+    # We choose a half-spreading rate of u0=3cm/yr.  
+    set Function constants  = u0=0.03, z0=160.77e3
+    set Variable names      = x,z
+    set Function expression = if( z >= z0, 0, u0*0.9659); if( z >= z0, 0, -u0*0.2588 )
+  end
 end
 
 # We prescribe the lithostatic pressure as a boundary traction on 
 # the bottom and right side of the model, so that material can flow in and out 
 # according to the flow induced by the moving plate.  
 subsection Boundary traction model
-  set Prescribed traction boundary indicators = left:initial lithostatic pressure, right:initial lithostatic pressure, bottom:initial lithostatic pressure
+  set Prescribed traction boundary indicators = bottom:initial lithostatic pressure
 
   subsection Initial lithostatic pressure
     # We calculate the pressure profile at the right model boundary. 
@@ -177,30 +245,34 @@ end
 
 # Melt moves with a different velocity than the solid, and transports energy, 
 # so we include this process in the model. 
-subsection Melt settings
-  # We want to solve the McKenzie Equations to track the flow of melt. 
-  set Include melt transport = true
-  set Heat advection by melt = true
-end
-
+#subsection Melt settings
+#  # We want to solve the McKenzie Equations to track the flow of melt. 
+#  set Include melt transport = true
+#  set Heat advection by melt = true
+#end
 ##################### Composition ########################
 
 # We need two compositional fields: The porosity field to track the motion of 
 # melt, and the peridotite field to track the depletion of material, which is 
 # changed by the melting and freezing reactions.  
 subsection Compositional fields
-  set Number of fields = 2
-  set Names of fields = porosity, peridotite
+  set Number of fields = 3
+  set Names of fields = NA_upper_crust, NA_lower_crust, NA_mantle
 end
 
 # We set both fields to zero at the start of the model: The material is solid 
 # (zero porosity) and has the average mantle composition (zero depletion). 
 subsection Initial composition model
-  set Model name = function
-  subsection Function
-    set Function expression = 0; 0
-    set Variable names      = x,y
+  set Model name = ascii data
+  subsection Ascii data model
+    set Data directory = ./
+    set Data file name = goc_initC.txt
   end
+#  set Model name = function
+#  subsection Function
+#    set Function expression = 0; 0
+#    set Variable names      = x,y
+#  end
 end
 
 # The boundary conditions (which are relevant for material inflowing at the 
@@ -210,33 +282,60 @@ subsection Boundary composition model
   set List of model names = initial composition
 end
 
+################ Original Composition ###################
+
+# We need two compositional fields: The porosity field to track the motion of 
+# melt, and the peridotite field to track the depletion of material, which is 
+# changed by the melting and freezing reactions.  
+#subsection Compositional fields
+#  set Number of fields = 2
+#  set Names of fields = porosity, peridotite
+#end
+
+# We set both fields to zero at the start of the model: The material is solid 
+# (zero porosity) and has the average mantle composition (zero depletion). 
+#subsection Initial composition model
+#  set Model name = function
+#  subsection Function
+#    set Function expression = 0; 0
+#    set Variable names      = x,y
+#  end
+#end
+
+# The boundary conditions (which are relevant for material inflowing at the 
+# bottom boundary of the model) are the same as the initial conditions.
+#subsection Boundary composition model
+#  set Fixed composition boundary indicators   = bottom
+#  set List of model names = initial composition
+#end
+
 ##################### Mesh refinement #########################
 
 # We use adaptive mesh refinement to increase the resolution in regions where 
 # melt is present, and otherwise use a uniform grid. 
 subsection Mesh refinement
-  set Coarsening fraction                      = 0.5
-  set Refinement fraction                      = 0.5
+  #set Coarsening fraction                      = 0.5
+  #set Refinement fraction                      = 0.5
 
   # A refinement level of 5 (4 global + 1 adaptive refinements) corresponds to 
   # a cell size of approximately 1 km. 
-  set Initial adaptive refinement              = 1
-  set Initial global refinement                = 6
-  set Strategy                                 = minimum refinement function, composition threshold
-  set Time steps between mesh refinement       = 5
+  set Initial adaptive refinement              = 0
+  set Initial global refinement                = 0
+  #set Strategy                                 = minimum refinement function, composition threshold
+  set Time steps between mesh refinement       = 0
 
-  subsection Minimum refinement function
-    set Coordinate system   = cartesian
-    set Function expression = 4
-    set Variable names      = x,y
-  end
+  #subsection Minimum refinement function
+  #  set Coordinate system   = cartesian
+  #  set Function expression = 4
+  #  set Variable names      = x,y
+  #end
 
   # We use a very small refinement threshold for the porosity to make sure that
   # all cells where the two-phase flow equations are solved (melt cells) have
   # the higher resolution. 
-  subsection Composition threshold
-    set Compositional field thresholds = 1e-6, 1.0
-  end
+  #subsection Composition threshold
+  #  set Compositional field thresholds = 1e-6, 1.0
+  #end
 end
 
 ##################### Postprocessing ########################
@@ -247,7 +346,8 @@ subsection Postprocess
 
   # We mainly want to look at material properties of the solid and the melt. 
   subsection Visualization
-    set List of output variables      = material properties, melt material properties, melt fraction
+    # set List of output variables      = material properties, melt material properties, melt fraction
+    set List of output variables      = material properties
 
     subsection Material properties
       set List of material properties = density, viscosity
@@ -257,9 +357,9 @@ subsection Postprocess
     # at the property 'is melt cell', so we include it in the output. In addition, 
     # we always visualize the compaction pressure 'p_c' if this postprocessor is
     # used.  
-    subsection Melt material properties
-      set List of properties = compaction viscosity, permeability, fluid density, is melt cell
-    end
+    #subsection Melt material properties
+    #  set List of properties = compaction viscosity, permeability, fluid density, is melt cell
+    #end
 
     set Time between graphical output = 0
     set Interpolate output = true

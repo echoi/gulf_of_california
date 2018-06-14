@@ -56,12 +56,12 @@ int main()
                 std::cerr << "Unsubducted plates: x="<< xn <<" age="<<age<<std::endl;
             }
             // If in the NA plate
-            else if( xn > xt && zn > zmax - ( xn - xt ) * tan_delta ) {
+            else if( xn > xt && (zmax - zn) > ( xn - xt ) * tan_delta ) {
                 age = 100.0e6 * YEAR2SEC; // 100 My in seconds
                 std::cerr << "In NA plate: x="<< xn <<" age="<<age<<std::endl;
             }
             // If in or beneath the subducted plate
-            else if( xn > xt && zn <= zmax - ( xn - xt ) * tan_delta ) {
+            else if( xn > xt && (zmax - zn) <= ( xn - xt ) * tan_delta ) {
 #if 0
                 double xs = (xn - tan_delta * zn + tan_delta_sqrd * xt) / (1.0 + tan_delta_sqrd );
                 double ys = yn;
