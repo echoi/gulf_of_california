@@ -42,8 +42,9 @@ int main()
             double xn = i*(xmax-xmin)/(nx-1);
             double zn = j*(zmax-zmin)/(nz-1);
             double yn = 0.0;
+            double dn  = zmax - zn;
             double age = 0.0;
-            double depth  = zmax - zn;
+            double depth = 0.0;
             // If in or beneath unsubducted plates
             if( xn <= xt ) {
 #if 0
@@ -53,15 +54,17 @@ int main()
                 age = dist / (v_half * cos_alpha_FAR);
 #endif
                 age = xn / v_half ;
-                std::cerr << "Unsubducted plates: x="<< xn <<" age="<<age<<std::endl;
+                depth = dn;
+                // std::cerr << "Unsubducted plates: x="<< xn <<" age="<<age<<std::endl;
             }
             // If in the NA plate
-            else if( xn > xt && (zmax - zn) > ( xn - xt ) * tan_delta ) {
+            else if( xn > xt && dn < ( xn - xt ) * tan_delta ) {
                 age = 100.0e6 * YEAR2SEC; // 100 My in seconds
-                std::cerr << "In NA plate: x="<< xn <<" age="<<age<<std::endl;
+                depth = dn;
+                // std::cerr << "In NA plate: x="<< xn <<" age="<<age<<std::endl;
             }
             // If in or beneath the subducted plate
-            else if( xn > xt && (zmax - zn) <= ( xn - xt ) * tan_delta ) {
+            else if( xn > xt && dn >= ( xn - xt ) * tan_delta ) {
 #if 0
                 double xs = (xn - tan_delta * zn + tan_delta_sqrd * xt) / (1.0 + tan_delta_sqrd );
                 double ys = yn;
@@ -75,16 +78,17 @@ int main()
                 depth = zmax - sqrt( (xs-xn)*(xs-xn) + (zs-zn)*(zs-zn) );
 #endif
                 age = xn / ( v_half * cos_delta );
-                depth = ( zmax - ( xn - xt ) * tan_delta - zn ) / cos_delta;
+                depth = ( dn - ( xn - xt ) * tan_delta ) * cos_delta;
                 std::cerr << "In subducted Farallon plate: x="<< xn <<" age="<< age 
-                          << " depth="<< depth << std::endl;
+                          << " depth="<< depth <<" dn="<<dn<<" xn="<<xn<<" xt="<<xt 
+                          << " tan_delta="<<tan_delta<<" cos_delta="<<cos_delta<<std::endl;
             }
            
             if(age==0.0) age = 0.1e6 * YEAR2SEC; 
             double w = 0.5 * depth / sqrt( diffusivity * age );
             double temperature = surface_temperature + ( mantle_temperature - surface_temperature ) * erf(w);
             initT_file << xn <<" "<< zn <<" "<< temperature << std::endl;
-            std::cerr << counter <<" "<< xn <<" "<< zn <<" "<< temperature << std::endl;
+            // std::cerr << counter <<" "<< xn <<" "<< zn <<" "<< temperature << std::endl;
         }
     }
     initT_file.close();

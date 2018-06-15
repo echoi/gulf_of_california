@@ -171,9 +171,9 @@ subsection Boundary velocity model
   set Tangential velocity boundary indicators = top, left
   subsection Function
     # We choose a half-spreading rate of u0=3cm/yr.  
-    set Function constants  = u0=0.03, z0=160.77e3
+    set Function constants  = u0=0.03, zmax=350.0, z0=160.77e3
     set Variable names      = x,z
-    set Function expression = if( z >= z0, 0, u0*0.9659); if( z >= z0, 0, -u0*0.2588 )
+    set Function expression = if( (zmax - z) >= z0, 0, u0*0.9659); if( (zmax - z) >= z0, 0, -u0*0.2588 )
   end
 end
 
