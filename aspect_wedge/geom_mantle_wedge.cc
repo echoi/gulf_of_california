@@ -19,7 +19,7 @@
 */
 
 
-#include <aspect/geometry_model/two_merged_boxes.h>
+#include "geom_mantle_wedge.h"
 #include <aspect/geometry_model/initial_topography_model/zero_topography.h>
 
 #include <deal.II/grid/grid_generator.h>
@@ -36,7 +36,7 @@ namespace aspect
 
     template <int dim>
     void
-    TwoMergedBoxes<dim>::
+    MantleWedge<dim>::
     set_boundary_indicators (parallel::distributed::Triangulation<dim> &triangulation) const
     {
       // iterate over all active cells and (re)set the boundary indicators
@@ -78,7 +78,7 @@ namespace aspect
 
     template <int dim>
     void
-    TwoMergedBoxes<dim>::
+    MantleWedge<dim>::
     create_coarse_mesh (parallel::distributed::Triangulation<dim> &total_coarse_grid) const
     {
       std::vector<unsigned int> lower_rep_vec(lower_repetitions, lower_repetitions+dim);
@@ -127,7 +127,7 @@ namespace aspect
       // make sure the right boundary indicators are set after refinement
       // through the function set_boundary_indicators above
       total_coarse_grid.signals.post_refinement.connect
-      (std_cxx1x::bind (&TwoMergedBoxes<dim>::set_boundary_indicators,
+      (std_cxx1x::bind (&MantleWedge<dim>::set_boundary_indicators,
                         std_cxx1x::cref(*this),
                         std_cxx1x::ref(total_coarse_grid)));
     }
@@ -135,7 +135,7 @@ namespace aspect
 
     template <int dim>
     std::set<types::boundary_id>
-    TwoMergedBoxes<dim>::
+    MantleWedge<dim>::
     get_used_boundary_indicators () const
     {
       // boundary indicators are zero through 2*dim+2*(dim-1)-1
@@ -149,7 +149,7 @@ namespace aspect
 
     template <int dim>
     std::map<std::string,types::boundary_id>
-    TwoMergedBoxes<dim>::
+    MantleWedge<dim>::
     get_symbolic_boundary_names_map () const
     {
       switch (dim)
@@ -197,7 +197,7 @@ namespace aspect
 
     template <int dim>
     std::set< std::pair< std::pair<types::boundary_id, types::boundary_id>, unsigned int> >
-    TwoMergedBoxes<dim>::
+    MantleWedge<dim>::
     get_periodic_boundary_pairs () const
     {
       std::set< std::pair< std::pair<types::boundary_id, types::boundary_id>, unsigned int> > periodic_boundaries;
@@ -209,21 +209,21 @@ namespace aspect
 
     template <int dim>
     Point<dim>
-    TwoMergedBoxes<dim>::get_extents () const
+    MantleWedge<dim>::get_extents () const
     {
       return extents;
     }
 
     template <int dim>
     Point<dim>
-    TwoMergedBoxes<dim>::get_origin () const
+    MantleWedge<dim>::get_origin () const
     {
       return lower_box_origin;
     }
 
     template <int dim>
     double
-    TwoMergedBoxes<dim>::
+    MantleWedge<dim>::
     length_scale () const
     {
       return 0.01*extents[0];
@@ -232,7 +232,7 @@ namespace aspect
 
     template <int dim>
     double
-    TwoMergedBoxes<dim>::depth(const Point<dim> &position) const
+    MantleWedge<dim>::depth(const Point<dim> &position) const
     {
       const double d = maximal_depth()-(position(dim-1)-lower_box_origin[dim-1]);
       return std::min (std::max (d, 0.), maximal_depth());
@@ -241,7 +241,7 @@ namespace aspect
 
     template <int dim>
     Point<dim>
-    TwoMergedBoxes<dim>::representative_point(const double depth) const
+    MantleWedge<dim>::representative_point(const double depth) const
     {
       Assert (depth >= 0,
               ExcMessage ("Given depth must be positive or zero."));
@@ -258,14 +258,14 @@ namespace aspect
 
     template <int dim>
     double
-    TwoMergedBoxes<dim>::maximal_depth() const
+    MantleWedge<dim>::maximal_depth() const
     {
       return extents[dim-1];
     }
 
     template <int dim>
     bool
-    TwoMergedBoxes<dim>::has_curved_elements() const
+    MantleWedge<dim>::has_curved_elements() const
     {
       return false;
     }
@@ -274,7 +274,7 @@ namespace aspect
 
     template <int dim>
     bool
-    TwoMergedBoxes<dim>::point_is_in_domain(const Point<dim> &point) const
+    MantleWedge<dim>::point_is_in_domain(const Point<dim> &point) const
     {
       AssertThrow(this->get_free_surface_boundary_indicators().size() == 0 ||
                   this->get_timestep_number() == 0,
@@ -294,7 +294,7 @@ namespace aspect
 
     template <int dim>
     aspect::Utilities::Coordinates::CoordinateSystem
-    TwoMergedBoxes<dim>::natural_coordinate_system() const
+    MantleWedge<dim>::natural_coordinate_system() const
     {
       return aspect::Utilities::Coordinates::CoordinateSystem::cartesian;
     }
@@ -302,7 +302,7 @@ namespace aspect
 
     template <int dim>
     std_cxx11::array<double,dim>
-    TwoMergedBoxes<dim>::cartesian_to_natural_coordinates(const Point<dim> &position_point) const
+    MantleWedge<dim>::cartesian_to_natural_coordinates(const Point<dim> &position_point) const
     {
       std::array<double,dim> position_array;
       for (unsigned int i = 0; i < dim; i++)
@@ -315,7 +315,7 @@ namespace aspect
 
     template <int dim>
     Point<dim>
-    TwoMergedBoxes<dim>::natural_to_cartesian_coordinates(const std_cxx11::array<double,dim> &position_tensor) const
+    MantleWedge<dim>::natural_to_cartesian_coordinates(const std_cxx11::array<double,dim> &position_tensor) const
     {
       Point<dim> position_point;
       for (unsigned int i = 0; i < dim; i++)
@@ -328,12 +328,12 @@ namespace aspect
 
     template <int dim>
     void
-    TwoMergedBoxes<dim>::
+    MantleWedge<dim>::
     declare_parameters (ParameterHandler &prm)
     {
       prm.enter_subsection("Geometry model");
       {
-        prm.enter_subsection("Box with lithosphere boundary indicators");
+        prm.enter_subsection("Mantle wedge");
         {
           prm.declare_entry ("Lithospheric thickness", "0.2",
                              Patterns::Double (0),
@@ -417,59 +417,71 @@ namespace aspect
 
     template <int dim>
     void
-    TwoMergedBoxes<dim>::parse_parameters (ParameterHandler &prm)
+    MantleWedge<dim>::parse_parameters (ParameterHandler &prm)
     {
       prm.enter_subsection("Geometry model");
       {
-        prm.enter_subsection("Box with lithosphere boundary indicators");
+        prm.enter_subsection("Mantle wedge");
         {
           const double thickness_lith = prm.get_double("Lithospheric thickness");
+          const double thickness_wedge = prm.get_double("Wedge thickness");
 
-          extents[0]           = prm.get_double ("X extent");
-          lower_extents[0]     = extents[0];
-          upper_extents[0]     = extents[0];
-          lower_box_origin[0]  = prm.get_double ("Box origin X coordinate");
-          upper_box_origin[0]  = lower_box_origin[0];
-          periodic[0]          = prm.get_bool ("X periodic");
-          periodic[dim]        = prm.get_bool ("X periodic lithosphere");
-          // to match the two triangulations, it is required that the
-          // number of horizontal repetitions are the same
-          lower_repetitions[0] = prm.get_integer ("X repetitions");
-          upper_repetitions[0] = lower_repetitions[0];
+          extents[0]            = prm.get_double ("X extent");
+          lower_extents[0]      = extents[0];
+          middle_extents[0]     = extents[0];
+          upper_extents[0]      = extents[0];
+          lower_box_origin[0]   = prm.get_double ("Box origin X coordinate");
+          middle_box_origin[0]  = lower_box_origin[0];
+          upper_box_origin[0]   = lower_box_origin[0];
+          periodic[0]           = prm.get_bool ("X periodic");
+          periodic[dim]         = prm.get_bool ("X periodic wedge");
+          periodic[dim+1]       = prm.get_bool ("X periodic lithosphere");
+          lower_repetitions[0]  = prm.get_integer ("X repetitions");
+          middle_repetitions[0] = lower_repetitions[0];
+          upper_repetitions[0]  = lower_repetitions[0];
 
-          extents[1]           = prm.get_double ("Y extent");
-          lower_box_origin[1]  = prm.get_double ("Box origin Y coordinate");
-          periodic[1]          = prm.get_bool ("Y periodic");;
-          lower_repetitions[1] = prm.get_integer ("Y repetitions");
+          extents[1]            = prm.get_double ("Y extent");
+          lower_box_origin[1]   = prm.get_double ("Box origin Y coordinate");
+          periodic[1]           = prm.get_bool ("Y periodic");;
+          lower_repetitions[1]  = prm.get_integer ("Y repetitions");
 
           if (dim == 2)
             {
-              lower_extents[1]     = extents[1] - thickness_lith;
-              upper_extents[1]     = thickness_lith;
-              upper_box_origin[1]  = lower_extents[1];
-              upper_repetitions[1] = prm.get_integer ("Y repetitions lithosphere");
+              lower_extents[1]      = extents[1] - thickness_lith - thickness_wedge;
+              middle_extents[1]     = thickness_wedge;
+              upper_extents[1]      = thickness_lith;
+              middle_box_origin[1]  = lower_box_origin[1] + lower_extents[1];
+              upper_box_origin[1]   = lower_box_origin[1] + lower_extents[1] + middle_extents[1];
+              middle_repetitions[1] = prm.get_integer ("Y repetitions wedge");
+              upper_repetitions[1]  = prm.get_integer ("Y repetitions lithosphere");
             }
 
           if (dim == 3)
             {
-              lower_extents[1]     = extents[1];
-              upper_extents[1]     = extents[1];
-              upper_box_origin[1]  = lower_box_origin[1];
-              periodic[dim+1]      = prm.get_bool ("Y periodic lithosphere");
-              // to match the two triangulations, it is required that the
-              // number of horizontal repetitions are the same
-              upper_repetitions[1] = lower_repetitions[1];
-              extents[2]           = prm.get_double ("Z extent");
-              lower_extents[2]     = extents[2] - thickness_lith;
-              upper_extents[2]     = thickness_lith;
-              lower_box_origin[2]  = prm.get_double ("Box origin Z coordinate");
-              upper_box_origin[2]  = lower_extents[2];
-              periodic[2]          = prm.get_bool ("Z periodic");
-              lower_repetitions[2] = prm.get_integer ("Z repetitions");
-              upper_repetitions[2] = prm.get_integer ("Z repetitions lithosphere");
+              lower_extents[1]      = extents[1];
+              middle_extents[1]     = extents[1];
+              upper_extents[1]      = extents[1];
+              middle_box_origin[1]  = lower_box_origin[1];
+              upper_box_origin[1]   = lower_box_origin[1];
+              periodic[dim+2]       = prm.get_bool ("Y periodic wedge");
+              periodic[dim+3]       = prm.get_bool ("Y periodic lithosphere");
+              middle_repetitions[1] = lower_repetitions[1];
+              upper_repetitions[1]  = lower_repetitions[1];
+              extents[2]            = prm.get_double ("Z extent");
+              lower_extents[2]      = extents[2] - thickness_wedge - thickness_lith;
+              middle_extents[2]     = extents[2] - thickness_lith;
+              upper_extents[2]      = thickness_lith;
+              lower_box_origin[2]   = prm.get_double ("Box origin Z coordinate");
+              middle_box_origin[2]  = lower_box_origin[2] + lower_extents[2];
+              upper_box_origin[2]   = lower_box_origin[2] + lower_extents[2] + middle_extents[2]; 
+              periodic[2]           = prm.get_bool ("Z periodic");
+              lower_repetitions[2]  = prm.get_integer ("Z repetitions");
+              middle_repetitions[2] = prm.get_integer ("Z repetitions wedge");
+              upper_repetitions[2]  = prm.get_integer ("Z repetitions lithosphere");
             }
 
-          height_lith = extents[dim-1] - thickness_lith;
+          height_lith  = extents[dim-1] - thickness_lith;
+          height_wedge = extents[dim-1] - thickness_lith - thickness_wedge;
 
         }
         prm.leave_subsection();
@@ -484,28 +496,31 @@ namespace aspect
 {
   namespace GeometryModel
   {
-    ASPECT_REGISTER_GEOMETRY_MODEL(TwoMergedBoxes,
-                                   "box with lithosphere boundary indicators",
+    ASPECT_REGISTER_GEOMETRY_MODEL(MantleWedge,
+                                   "mantle wedge",
                                    "A box geometry parallel to the coordinate directions. "
                                    "The extent of the box in each coordinate direction "
                                    "is set in the parameter file. This geometry model labels its "
-                                   "sides with 2*dim+2*(dim-1) boundary indicators: in 2d, boundary indicators 0 through 3 "
+                                   "sides with 2*dim+4*(dim-1) boundary indicators: in 2d, boundary indicators 0 through 3 "
                                    "denote the left, right, bottom and top boundaries, while indicators"
-                                   "4 and 5 denote the upper part of the left and right vertical boundary, "
+                                   "4 and 5 denote the middle part of the left and right vertical boundary, "
+                                   "6 and 7 denote the upper part of the left and right vertical boundary, "
                                    "respectively. In 3d, boundary "
                                    "indicators 0 through 5 indicate left, right, front, back, bottom "
                                    "and top boundaries (see also the documentation of the deal.II class "
                                    "``GeometryInfo''), while indicators 6, 7, 8 and 9 denote the left, "
-                                   "right, front and back upper parts of the vertical boundaries, respectively. "
+                                   "right, front and back middle parts of the vertical boundaries, respectively; and "
+                                   "indicators 10, 11, 12, 13 denote the left, "
+                                   "right, front and back upper parts of the vertical boundaries;, respectively. "
                                    "You can also use symbolic names ``left'', ``right'', "
-                                   "``left lithosphere'', etc., to refer to these boundaries in input files."
+                                   "``left middle'', ``left upper'', etc., to refer to these boundaries in input files."
                                    "\n\n"
                                    "Note that for a given ``Global refinement level'' and no user-specified "
                                    "``Repetitions'', the lithosphere part of the mesh will be more refined. "
                                    "\n\n"
                                    "The additional boundary indicators for the lithosphere allow for "
                                    "selecting boundary conditions for the "
-                                   "lithosphere different from those for the underlying mantle. "
+                                   "lithosphere and mantle wedge different from those for the underlying mantle. "
                                    "An example application of this geometry is to prescribe a velocity on "
                                    "the lithospheric plates, but use open boundary conditions underneath. ")
   }
