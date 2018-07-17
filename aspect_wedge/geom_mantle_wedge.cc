@@ -138,9 +138,9 @@ namespace aspect
     MantleWedge<dim>::
     get_used_boundary_indicators () const
     {
-      // boundary indicators are zero through 2*dim+2*(dim-1)-1
+      // boundary indicators are zero through 2*dim+4*(dim-1)-1
       std::set<types::boundary_id> s;
-      for (unsigned int i=0; i<2*dim+2*(dim-1); ++i)
+      for (unsigned int i=0; i<2*dim+4*(dim-1); ++i)
         s.insert (i);
       return s;
     }
@@ -161,8 +161,10 @@ namespace aspect
                   std::pair<std::string,types::boundary_id>("right",  1),
                   std::pair<std::string,types::boundary_id>("bottom", 2),
                   std::pair<std::string,types::boundary_id>("top",    3),
-                  std::pair<std::string,types::boundary_id>("left lithosphere", 4),
-                  std::pair<std::string,types::boundary_id>("right lithosphere",5)
+                  std::pair<std::string,types::boundary_id>("left wedge", 4),
+                  std::pair<std::string,types::boundary_id>("right wedge",5),
+                  std::pair<std::string,types::boundary_id>("left lithosphere", 6),
+                  std::pair<std::string,types::boundary_id>("right lithosphere",7)
                 };
 
             return std::map<std::string,types::boundary_id> (&mapping[0],
@@ -178,10 +180,14 @@ namespace aspect
                   std::pair<std::string,types::boundary_id>("back",   3),
                   std::pair<std::string,types::boundary_id>("bottom", 4),
                   std::pair<std::string,types::boundary_id>("top",    5),
-                  std::pair<std::string,types::boundary_id>("left lithosphere",  6),
-                  std::pair<std::string,types::boundary_id>("right lithosphere", 7),
-                  std::pair<std::string,types::boundary_id>("front lithosphere", 8),
-                  std::pair<std::string,types::boundary_id>("back lithosphere",  9)
+                  std::pair<std::string,types::boundary_id>("left wedge",  6),
+                  std::pair<std::string,types::boundary_id>("right wedge", 7),
+                  std::pair<std::string,types::boundary_id>("front wedge", 10),
+                  std::pair<std::string,types::boundary_id>("back wedge",  11),
+                  std::pair<std::string,types::boundary_id>("left lithosphere",  8),
+                  std::pair<std::string,types::boundary_id>("right lithosphere", 9),
+                  std::pair<std::string,types::boundary_id>("front lithosphere", 12),
+                  std::pair<std::string,types::boundary_id>("back lithosphere",  13)
                 };
 
             return std::map<std::string,types::boundary_id> (&mapping[0],
@@ -201,7 +207,7 @@ namespace aspect
     get_periodic_boundary_pairs () const
     {
       std::set< std::pair< std::pair<types::boundary_id, types::boundary_id>, unsigned int> > periodic_boundaries;
-      for ( unsigned int i=0; i<dim+dim-1; ++i)
+      for ( unsigned int i=0; i<dim+2*(dim-1); ++i)
         if (periodic[i])
           periodic_boundaries.insert( std::make_pair( std::pair<types::boundary_id, types::boundary_id>(2*i, 2*i+1), i) );
       return periodic_boundaries;
@@ -341,6 +347,11 @@ namespace aspect
                              "additional boundary indicators to set specific "
                              "boundary conditions for the lithosphere. ");
 
+          prm.declare_entry ("Wedge thickness", "0.2",
+                             Patterns::Double (0),
+                             "The thickness of the mantle wedge used to create "
+                             "additional boundary indicators to set specific "
+                             "boundary conditions for the mantle wedge. ");
           // Total box extents
           prm.declare_entry ("X extent", "1",
                              Patterns::Double (0),
@@ -379,6 +390,15 @@ namespace aspect
                              "Number of cells in Z direction of the lower box. "
                              "This value is ignored if the simulation is in 2d.");
 
+          // Middle box repetitions
+          prm.declare_entry ("Y repetitions wedge", "1",
+                             Patterns::Integer (1),
+                             "Number of cells in Y direction in the wedge. "
+                             "This value is ignored if the simulation is in 3d.");
+          prm.declare_entry ("Z repetitions wedge", "1",
+                             Patterns::Integer (1),
+                             "Number of cells in Z direction in the wedge. "
+                             "This value is ignored if the simulation is in 2d.");
           // Upper box repetitions
           prm.declare_entry ("Y repetitions lithosphere", "1",
                              Patterns::Integer (1),
@@ -400,6 +420,13 @@ namespace aspect
                              Patterns::Bool (),
                              "Whether the box should be periodic in Z direction. "
                              "This value is ignored if the simulation is in 2d.");
+          prm.declare_entry ("X periodic wedge", "false",
+                             Patterns::Bool (),
+                             "Whether the box should be periodic in X direction in the wedge.");
+          prm.declare_entry ("Y periodic wedge", "false",
+                             Patterns::Bool (),
+                             "Whether the box should be periodic in Y direction in the wedge. "
+                             "This value is ignored if the simulation is in 2d. ");
           prm.declare_entry ("X periodic lithosphere", "false",
                              Patterns::Bool (),
                              "Whether the box should be periodic in X direction in the lithosphere.");
