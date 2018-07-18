@@ -117,7 +117,7 @@ namespace aspect
       GridGenerator::subdivided_hyper_rectangle (middle_coarse_grid,
                                                  middle_rep_vec,
                                                  middle_box_origin,
-                                                 middle_box_origin+upper_extents,
+                                                 middle_box_origin+middle_extents,
                                                  false);
 
       // create upper_coarse_grid mesh
