@@ -163,8 +163,8 @@ subsection Geometry model
 
   # subsection Box
   subsection Mantle wedge
-    set Lithospheric thickness = 100.00e3
-    set Wedge thickness        = 60.77e3
+    set Lithospheric thickness = 50.00e3
+    set Wedge thickness        = 110.77e3
     set X extent               = 700000
     set Y extent               = 350000
     # set Z extent      = 1200000
@@ -201,7 +201,6 @@ end
 # speed, and close to the ridge we interpolate between these two conditions. 
 subsection Boundary velocity model
   set Prescribed velocity boundary indicators = right:function
-  #set Tangential velocity boundary indicators = left
   set Tangential velocity boundary indicators = top, left, left wedge, left lithosphere, right lithosphere
   subsection Function
     # We choose a half-spreading rate of u0=3cm/yr.  
