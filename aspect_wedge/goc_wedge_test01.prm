@@ -159,10 +159,10 @@ end
 # material is solid, and will start to melt within the model domain.  
 subsection Geometry model
   # set Model name = box
-  set Model name = box with lithosphere boundary indicators
+  set Model name = mantle wedge
 
   # subsection Box
-  subsection Box with lithosphere boundary indicators
+  subsection Mantle wedge
     set Lithospheric thickness = 100.00e3
     set Wedge thickness        = 60.77e3
     set X extent               = 700000
@@ -409,21 +409,21 @@ end
 
 ################ Prescribed Internal Velocity ################
 ## Turn prescribed velocities on
-set Prescribe internal velocities = false
-
-subsection Prescribed velocities
-  subsection Indicator function
-    set Variable names = x,y,t
-    # Return where to prescribe u_x; u_y; u_z
-    # (last one only used if dimension = 3)
-    # 1 if velocity should be prescribed, 0 otherwise
-    set Function expression = if(((x>100e3)&(x<700e3))&(y <= 350e3 - (x-100e3)*tan(15.0*pi/180.0)),1,0); \
-                                if(((x>-0.1)&(x<1.9))&(abs(x-(1-y))<.01),1,0)
-  end
-  subsection Velocity function
-    set Variable names = x,y,t
-    # Return u_x; u_y; u_z (u_z only used if in 3d)
-    set Function expression = 0.03;-0.03
-  end
-end
+#set Prescribe internal velocities = false
+#
+#subsection Prescribed velocities
+#  subsection Indicator function
+#    set Variable names = x,y,t
+#    # Return where to prescribe u_x; u_y; u_z
+#    # (last one only used if dimension = 3)
+#    # 1 if velocity should be prescribed, 0 otherwise
+#    set Function expression = if(((x>100e3)&(x<700e3))&(y <= 350e3 - (x-100e3)*tan(15.0*pi/180.0)),1,0); \
+#                                if(((x>-0.1)&(x<1.9))&(abs(x-(1-y))<.01),1,0)
+#  end
+#  subsection Velocity function
+#    set Variable names = x,y,t
+#    # Return u_x; u_y; u_z (u_z only used if in 3d)
+#    set Function expression = 0.03;-0.03
+#  end
+#end
 
