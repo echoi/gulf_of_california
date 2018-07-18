@@ -113,11 +113,13 @@ namespace aspect
          * boundary conditions.
          *
          * This geometry returns the map <code>{{"left"->0}, {"right"->1},
-         * {"bottom"->2}, {"top"->3}, {"left lithosphere"->4},
-         * {"right lithosphere"->5}}</code> in 2d, and <code>{{"left"->0},
-         * {"right"->1}, {"front"->2}, {"back"->3}, {"bottom"->4},
-         * {"top"->5}, {"left lithosphere"->6}, {"right lithosphere"->7},
-         * {"front lithosphere"->8}, {"back lithosphere"->9}}</code> in 3d.
+         * {"bottom"->2}, {"top"->3}, {"left wedge"->4}, {"right wedge"->5},
+         * {"left lithosphere"->6}, {"right lithosphere"->7}}</code> in 2d, 
+         * and <code>{{"left"->0}, {"right"->1}, {"front"->2}, {"back"->3}, 
+         * {"bottom"->4}, {"top"->5}, {"left wedge"->6}, {"right wedge"->7},
+         * {"left lithosphere"->8}, {"right lithosphere"->9},
+         * {"front wedge"->10}, {"back wedge"->11},
+         * {"front lithosphere"->12}, {"back lithosphere"->13}}</code> in 3d.
          */
         virtual
         std::map<std::string,types::boundary_id>
@@ -203,6 +205,16 @@ namespace aspect
         Point<dim> lower_box_origin;
 
         /**
+         * Extent of the middle box in x-, y-, and z-direction (in 3d).
+         */
+        Point<dim> middle_extents;
+
+        /**
+         * Origin of the middle box in x, y, and z (in 3d) coordinates.
+         */
+        Point<dim> middle_box_origin;
+
+        /**
          * Extent of the upper box in x-, y-, and z-direction (in 3d).
          */
         Point<dim> upper_extents;
@@ -216,12 +228,17 @@ namespace aspect
          * Flag whether the whole domain is periodic in the x-, y-, and z-directions,
          * the x- and y- (in 3d) direction in the lithosphere.
          */
-        bool periodic[dim+dim-1];
+        bool periodic[dim+2*(dim-1)];
 
         /**
          * The number of cells in each coordinate direction for the lower box.
          */
         unsigned int lower_repetitions[dim];
+
+        /**
+         * The number of cells in each coordinate direction for the middle box.
+         */
+        unsigned int middle_repetitions[dim];
 
         /**
          * The number of cells in each coordinate direction for the upper box.
@@ -233,6 +250,12 @@ namespace aspect
          * (so in positive z-direction).
          */
         double height_lith;
+
+        /**
+         * The height where the wedge part of the vertical boundary begins
+         * (so in positive z-direction).
+         */
+        double height_wedge;
 
         /**
          * Bind boundary indicators to child cells after each mesh refinement round.

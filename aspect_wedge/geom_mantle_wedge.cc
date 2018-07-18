@@ -51,27 +51,43 @@ namespace aspect
             if (cell->face(f)->at_boundary())
               cell->face(f)->set_boundary_id (f);
 
-          if (cell->face(0)->at_boundary())
-            // set the lithospheric part of the left boundary to indicator 2*dim
-            if (cell->face(0)->vertex(GeometryInfo<dim-1>::vertices_per_cell-1)[dim-1] > height_lith)
-              cell->face(0)->set_boundary_id (2*dim);
+          if (cell->face(0)->at_boundary()) 
+            {
+              // set the lithospheric part of the left boundary to indicator 2*dim
+              if (cell->face(0)->vertex(GeometryInfo<dim-1>::vertices_per_cell-1)[dim-1] > height_wedge)
+                cell->face(0)->set_boundary_id (2*dim);
+              if (cell->face(0)->vertex(GeometryInfo<dim-1>::vertices_per_cell-1)[dim-1] > height_lith)
+                cell->face(0)->set_boundary_id (2*dim+2);
+            }
 
-          if (cell->face(1)->at_boundary())
-            // set the lithospheric part of the right boundary to indicator 2*dim+1
-            if (cell->face(1)->vertex(GeometryInfo<dim-1>::vertices_per_cell-1)[dim-1] > height_lith)
-              cell->face(1)->set_boundary_id (2*dim+1);
+          if (cell->face(1)->at_boundary()) 
+            {
+              // set the lithospheric part of the right boundary to indicator 2*dim+1
+              if (cell->face(1)->vertex(GeometryInfo<dim-1>::vertices_per_cell-1)[dim-1] > height_wedge)
+                cell->face(1)->set_boundary_id (2*dim+1);
+              if (cell->face(1)->vertex(GeometryInfo<dim-1>::vertices_per_cell-1)[dim-1] > height_lith)
+                cell->face(1)->set_boundary_id (2*dim+3);
+            }
 
           if (dim==3)
             {
               // set the lithospheric part of the front boundary to indicator 2*dim+2
-              if (cell->face(2)->at_boundary())
-                if (cell->face(2)->vertex(GeometryInfo<dim-1>::vertices_per_cell-1)[dim-1] > height_lith)
-                  cell->face(2)->set_boundary_id (2*dim+2);
+              if (cell->face(2)->at_boundary()) 
+                {
+                  if (cell->face(2)->vertex(GeometryInfo<dim-1>::vertices_per_cell-1)[dim-1] > height_wedge)
+                    cell->face(2)->set_boundary_id (2*dim+4);
+                  if (cell->face(2)->vertex(GeometryInfo<dim-1>::vertices_per_cell-1)[dim-1] > height_lith)
+                    cell->face(2)->set_boundary_id (2*dim+6);
+                }
 
               // set the lithospheric part of the back boundary to indicator 2*dim+3
-              if (cell->face(3)->at_boundary())
-                if (cell->face(3)->vertex(GeometryInfo<dim-1>::vertices_per_cell-1)[dim-1] > height_lith)
-                  cell->face(3)->set_boundary_id (2*dim+3);
+              if (cell->face(3)->at_boundary()) 
+                {
+                  if (cell->face(3)->vertex(GeometryInfo<dim-1>::vertices_per_cell-1)[dim-1] > height_wedge)
+                    cell->face(3)->set_boundary_id (2*dim+5);
+                  if (cell->face(3)->vertex(GeometryInfo<dim-1>::vertices_per_cell-1)[dim-1] > height_lith)
+                    cell->face(3)->set_boundary_id (2*dim+7);
+                }
             }
         }
     }
@@ -82,17 +98,26 @@ namespace aspect
     create_coarse_mesh (parallel::distributed::Triangulation<dim> &total_coarse_grid) const
     {
       std::vector<unsigned int> lower_rep_vec(lower_repetitions, lower_repetitions+dim);
+      std::vector<unsigned int> middle_rep_vec(middle_repetitions, middle_repetitions+dim);
       std::vector<unsigned int> upper_rep_vec(upper_repetitions, upper_repetitions+dim);
 
       // the two triangulations that will be merged
       Triangulation<dim> lower_coarse_grid;
+      Triangulation<dim> middle_coarse_grid;
       Triangulation<dim> upper_coarse_grid;
+      Triangulation<dim> temp_coarse_grid;
 
       // create lower_coarse_grid mesh
       GridGenerator::subdivided_hyper_rectangle (lower_coarse_grid,
                                                  lower_rep_vec,
                                                  lower_box_origin,
                                                  lower_box_origin+lower_extents,
+                                                 false);
+      // create middle_coarse_grid mesh
+      GridGenerator::subdivided_hyper_rectangle (middle_coarse_grid,
+                                                 middle_rep_vec,
+                                                 middle_box_origin,
+                                                 middle_box_origin+upper_extents,
                                                  false);
 
       // create upper_coarse_grid mesh
@@ -105,6 +130,9 @@ namespace aspect
       // merge the lower and upper mesh into one total_coarse_grid.
       // now we have at least two cells
       GridGenerator::merge_triangulations(lower_coarse_grid,
+                                          middle_coarse_grid,
+                                          temp_coarse_grid);
+      GridGenerator::merge_triangulations(temp_coarse_grid,
                                           upper_coarse_grid,
                                           total_coarse_grid);
 

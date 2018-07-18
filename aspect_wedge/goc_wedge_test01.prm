@@ -20,7 +20,7 @@ set Output directory                       = output_goc_test04
 set End time                               = 8e6
 
 # Load the signal library.
-set Additional shared libraries = ./libprescribed_velocity.so
+set Additional shared libraries = ./libgeom_mantle_wedge.so
 
 ##################### Melting and freezing ########################
 
@@ -163,9 +163,10 @@ subsection Geometry model
 
   # subsection Box
   subsection Box with lithosphere boundary indicators
-    set Lithospheric thickness = 160.77e3
-    set X extent      = 700000
-    set Y extent      = 350000
+    set Lithospheric thickness = 100.00e3
+    set Wedge thickness        = 60.77e3
+    set X extent               = 700000
+    set Y extent               = 350000
     # set Z extent      = 1200000
 
     # To keep the aspect ratio of our elements close to one, we chose the 
@@ -173,7 +174,8 @@ subsection Geometry model
     # direction, in the same ratio as the aspect ratio of the model. 
     set X repetitions = 100
     set Y repetitions = 30
-    set Y repetitions lithosphere = 20
+    set Y repetitions wedge = 10
+    set Y repetitions lithosphere = 10
     # set Z repetitions = 3
   end
 end
@@ -200,7 +202,7 @@ end
 subsection Boundary velocity model
   set Prescribed velocity boundary indicators = right:function
   #set Tangential velocity boundary indicators = left
-  set Tangential velocity boundary indicators = top, left, left lithosphere
+  set Tangential velocity boundary indicators = top, left, left wedge, left lithosphere, right lithosphere
   subsection Function
     # We choose a half-spreading rate of u0=3cm/yr.  
     set Function constants  = u0=0.03, zmax=350.0e3, z0=160.77e3
@@ -213,7 +215,7 @@ end
 # the bottom and right side of the model, so that material can flow in and out 
 # according to the flow induced by the moving plate.  
 subsection Boundary traction model
-  set Prescribed traction boundary indicators = bottom:initial lithostatic pressure, right lithosphere:initial lithostatic pressure
+  set Prescribed traction boundary indicators = bottom:initial lithostatic pressure, right wedge:initial lithostatic pressure
 
   subsection Initial lithostatic pressure
     # We calculate the pressure profile at the right model boundary. 
