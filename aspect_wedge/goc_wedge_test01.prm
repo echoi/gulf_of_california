@@ -10,10 +10,10 @@ set Adiabatic surface temperature          = 1593
 # use an iterative solver scheme, that iterates between solving the temperature
 # composition and Stokes equations. 
 set Nonlinear solver scheme                = iterated Advection and Stokes
-set Max nonlinear iterations = 20
+set Max nonlinear iterations = 500
 set Nonlinear solver tolerance = 1e-5
 
-set Output directory                       = output_goc_test04
+set Output directory                       = output_goc_wedge_test01
 
 # The end time of the simulation. We want to run the model until it reaches
 # steady state, which is after approximately 6 million years. 
@@ -174,8 +174,8 @@ subsection Geometry model
     # direction, in the same ratio as the aspect ratio of the model. 
     set X repetitions = 100
     set Y repetitions = 30
-    set Y repetitions wedge = 10
-    set Y repetitions lithosphere = 10
+    set Y repetitions wedge = 15
+    set Y repetitions lithosphere = 5
     # set Z repetitions = 3
   end
 end
